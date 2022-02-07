@@ -57,4 +57,43 @@ server.post("/api/users", (req, res) => {
   }
 });
 
+server.put("/api/users/:id", async (req, res) => {
+  let { id } = req.params;
+  try {
+    let item = model.findById(id);
+    if (item == null) {
+      res.status(404).json({ message: `couldnt find user with id ${id}` });
+      return;
+    }
+    let body = req.body;
+    if (!body.name) {
+      res.status(500).json({ message: `needs a name` });
+      return;
+    } else if (!body.bio) {
+      res.status(500).json({ message: `needs a bio` });
+      return;
+    } else {
+      let user = await model.update(id, body);
+      res.status(200).json(user);
+    }
+  } catch (e) {
+    res.status(500).json({ message: "could not update" });
+  }
+});
+
+server.delete("/api/users/:id", (req, res) => {
+  let { id } = req.params;
+  model
+    .remove(id)
+    .then((user) => {
+      if (user == null) {
+        res.status(404).json({ message: `couldnt find user with id ${id}` });
+      } else {
+        res.status(200).json(user);
+      }
+    })
+    .catch(() => {
+      res.status(500).json({ message: "could not delete" });
+    });
+});
 module.exports = server; // EXPORT YOUR SERVER instead of {}
